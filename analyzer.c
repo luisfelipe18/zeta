@@ -150,7 +150,7 @@ static ZType infer(Ana *a, ASTNode *n) {
 
     case AST_CALL: {
         /* Resolve callee */
-        char fname[256] = {0};
+        char fname[1152] = {0};  /* struct_name(64) + '_' + method(MAX_TOKEN_LEN) */
         if (n->left && n->left->type == AST_IDENT) {
             strncpy(fname, n->left->str, sizeof(fname)-1);
         } else if (n->left && n->left->type == AST_MEMBER) {
@@ -249,7 +249,7 @@ static void ana_block(Ana *a, ASTNode *block) {
 /* ── First pass: collect signatures ────────────────────────────── */
 
 static void collect_func(Ana *a, ASTNode *fn, const char *prefix) {
-    char mangled[256];
+    char mangled[1152];  /* struct_name(64) + '_' + method(MAX_TOKEN_LEN) */
     if (prefix && prefix[0])
         snprintf(mangled, sizeof(mangled), "%s_%s", prefix, fn->str);
     else

@@ -71,7 +71,7 @@ typedef struct {
     Lexer *lex;
     Token  cur;          /* current lookahead token */
     int    had_error;
-    char   err[256];
+    char   err[2048];   /* large enough for messages with full token values */
 } Parser;
 
 /* ── Public API ──────────────────────────────────────────────────────── */

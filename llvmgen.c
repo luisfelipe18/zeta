@@ -156,12 +156,20 @@ static void ll_var_def(LLCG *g, const char *name, int slot, ZType type) {
     g->n_vars++;
 }
 
+/* ── Portable strdup (strdup is POSIX, not C99) ──────────────────── */
+static char *ll_strdup(const char *s) {
+    size_t n = strlen(s) + 1;
+    char *d = (char *)malloc(n);
+    if (d) memcpy(d, s, n);
+    return d;
+}
+
 /* ── String literal interning ────────────────────────────────────── */
 static int ll_str_intern(LLCG *g, const char *s) {
     for (int i = 0; i < g->n_strtab; i++)
         if (strcmp(g->strtab[i].text, s) == 0) return g->strtab[i].id;
     int id = g->n_strtab;
-    g->strtab[id].text = strdup(s);
+    g->strtab[id].text = ll_strdup(s);
     /* Byte length: count actual bytes including null */
     int blen = 0;
     for (const char *p = s; ; p++) {
@@ -374,7 +382,7 @@ static int ll_gen_expr(LLCG *g, ASTNode *n) {
             ZType base = obj_t; base.is_ptr = 0;
             if (base.kind == ZTYPE_STRUCT) {
                 int slot = ll_var_find(g, obj ? obj->str : "");
-                char mn[256];
+                char mn[1152];  /* struct_name(64) + '_' + method(MAX_TOKEN_LEN) */
                 snprintf(mn, sizeof(mn), "%s_%s", base.name, mem->str);
                 SymEntry *ret_e = scope_lookup(g->gscope, mn);
                 ZType ret_t = ret_e ? ret_e->type : (ZType){.kind=ZTYPE_VOID};
