@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+
+  <!-- Fondo: pergamino cálido -->
+  <rect width="400" height="400" rx="72" fill="#FDF7EE"/>
+
+  <!-- Borde suave -->
+  <rect width="400" height="400" rx="72"
+        fill="none" stroke="#DFD0B8" stroke-width="2"/>
+
+  <!-- ζ en azul pizarra apagado, cursiva serif -->
+  <text x="200" y="298"
+        text-anchor="middle"
+        font-family="Georgia, 'Palatino Linotype', Palatino, serif"
+        font-size="252"
+        font-style="italic"
+        fill="#4A6B8A">ζ</text>
+
+</svg>

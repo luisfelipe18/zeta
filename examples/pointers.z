@@ -1,0 +1,35 @@
+# pointers.z — Manual memory management and raw pointers in Z
+# Compile: zc pointers.z -o pointers && ./pointers
+
+# Swap two heap-allocated integers via pointers
+def swap(a: *i32, b: *i32):
+    let tmp = a.*
+    a.* = b.*
+    b.* = tmp
+
+def main():
+    # Allocate two integers on the heap
+    mut x: *i32 = alloc(i32)
+    mut y: *i32 = alloc(i32)
+    x.* = 42
+    y.* = 99
+
+    let vx = x.*
+    let vy = y.*
+    print("Before swap: x={vx}  y={vy}")
+
+    swap(x, y)
+
+    let ax = x.*
+    let ay = y.*
+    print("After  swap: x={ax}  y={ay}")
+
+    free(x)
+    free(y)
+
+    # A single heap-allocated value written and read back
+    mut p: *i32 = alloc(i32)
+    p.* = 1000
+    let val = p.*
+    print("Heap value:  {val}")
+    free(p)

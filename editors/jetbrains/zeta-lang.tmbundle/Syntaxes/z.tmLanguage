@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Zeta Language (ζ) — TextMate grammar
+  Compatible with: JetBrains IDEs (IntelliJ, CLion, PyCharm, etc.)
+                   VS Code  · Sublime Text · TextMate
+  File extension: .z
+-->
+<plist version="1.0">
+<dict>
+
+  <key>name</key>
+  <string>Zeta (ζ)</string>
+
+  <key>scopeName</key>
+  <string>source.z</string>
+
+  <key>fileTypes</key>
+  <array>
+    <string>z</string>
+  </array>
+
+  <key>uuid</key>
+  <string>B1C2D3E4-F5A6-7890-BCDE-F1234567890A</string>
+
+  <!-- ─────────────────────────────────────────────────────────────────
+       Top-level patterns (order matters — first match wins)
+       ───────────────────────────────────────────────────────────────── -->
+  <key>patterns</key>
+  <array>
+    <dict><key>include</key><string>#comment</string></dict>
+    <dict><key>include</key><string>#string</string></dict>
+    <dict><key>include</key><string>#function-def</string></dict>
+    <dict><key>include</key><string>#struct-impl</string></dict>
+    <dict><key>include</key><string>#keywords-control</string></dict>
+    <dict><key>include</key><string>#keywords-decl</string></dict>
+    <dict><key>include</key><string>#type-annotation</string></dict>
+    <dict><key>include</key><string>#builtin-types</string></dict>
+    <dict><key>include</key><string>#constants</string></dict>
+    <dict><key>include</key><string>#builtins</string></dict>
+    <dict><key>include</key><string>#self-keyword</string></dict>
+    <dict><key>include</key><string>#numbers</string></dict>
+    <dict><key>include</key><string>#operators</string></dict>
+  </array>
+
+  <!-- ─────────────────────────────────────────────────────────────────
+       Repository
+       ───────────────────────────────────────────────────────────────── -->
+  <key>repository</key>
+  <dict>
+
+    <!-- ── Comments ──────────────────────────────────────────────── -->
+    <key>comment</key>
+    <dict>
+      <key>name</key>
+      <string>comment.line.number-sign.z</string>
+      <key>match</key>
+      <string>#.*$</string>
+    </dict>
+
+    <!-- ── String literals with {interpolation} ──────────────────── -->
+    <key>string</key>
+    <dict>
+      <key>name</key>
+      <string>string.quoted.double.z</string>
+      <key>begin</key>
+      <string>"</string>
+      <key>end</key>
+      <string>"</string>
+      <key>patterns</key>
+      <array>
+
+        <!-- {expr} interpolation -->
+        <dict>
+          <key>name</key>
+          <string>meta.interpolation.z</string>
+          <key>begin</key>
+          <string>\{</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>0</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.definition.interpolation.begin.z</string>
+            </dict>
+          </dict>
+          <key>end</key>
+          <string>\}</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>0</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.definition.interpolation.end.z</string>
+            </dict>
+          </dict>
+          <key>patterns</key>
+          <array>
+            <!-- Member access inside interpolation: obj.field or ptr.* -->
+            <dict>
+              <key>match</key>
+              <string>([a-zA-Z_][a-zA-Z0-9_]*)(\.\*|(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+)</string>
+              <key>captures</key>
+              <dict>
+                <key>1</key>
+                <dict><key>name</key><string>variable.other.z</string></dict>
+                <key>2</key>
+                <dict><key>name</key><string>variable.other.member.z</string></dict>
+              </dict>
+            </dict>
+            <!-- Simple variable inside interpolation -->
+            <dict>
+              <key>name</key>
+              <string>variable.other.z</string>
+              <key>match</key>
+              <string>[a-zA-Z_][a-zA-Z0-9_]*</string>
+            </dict>
+          </array>
+        </dict>
+
+        <!-- Escape sequences -->
+        <dict>
+          <key>name</key>
+          <string>constant.character.escape.z</string>
+          <key>match</key>
+          <string>\\[ntr\\"{}]</string>
+        </dict>
+
+      </array>
+    </dict>
+
+    <!-- ── Function definition: def name(...) ────────────────────── -->
+    <key>function-def</key>
+    <dict>
+      <key>match</key>
+      <string>\b(def)\s+([a-zA-Z_][a-zA-Z0-9_]*)</string>
+      <key>captures</key>
+      <dict>
+        <key>1</key>
+        <dict><key>name</key><string>keyword.declaration.function.z</string></dict>
+        <key>2</key>
+        <dict><key>name</key><string>entity.name.function.z</string></dict>
+      </dict>
+    </dict>
+
+    <!-- ── Struct / impl TypeName ─────────────────────────────────── -->
+    <key>struct-impl</key>
+    <dict>
+      <key>match</key>
+      <string>\b(struct|impl)\s+([A-Z][a-zA-Z0-9_]*)</string>
+      <key>captures</key>
+      <dict>
+        <key>1</key>
+        <dict><key>name</key><string>keyword.declaration.z</string></dict>
+        <key>2</key>
+        <dict><key>name</key><string>entity.name.type.z</string></dict>
+      </dict>
+    </dict>
+
+    <!-- ── Control-flow keywords ──────────────────────────────────── -->
+    <key>keywords-control</key>
+    <dict>
+      <key>name</key>
+      <string>keyword.control.z</string>
+      <key>match</key>
+      <string>\b(if|else|while|for|in|return|match|and|or|not)\b</string>
+    </dict>
+
+    <!-- ── Declaration keywords ───────────────────────────────────── -->
+    <key>keywords-decl</key>
+    <dict>
+      <key>name</key>
+      <string>keyword.declaration.z</string>
+      <key>match</key>
+      <string>\b(def|let|mut|struct|impl|fn|type|trait|spawn|await)\b</string>
+    </dict>
+
+    <!-- ── Type annotation after colon: x: i32  or  -> f64 ───────── -->
+    <key>type-annotation</key>
+    <dict>
+      <key>patterns</key>
+      <array>
+        <!-- Return type: -> Type -->
+        <dict>
+          <key>match</key>
+          <string>(-&gt;)\s*(\*?[A-Za-z_][A-Za-z0-9_]*)</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key><dict><key>name</key><string>keyword.operator.arrow.z</string></dict>
+            <key>2</key><dict><key>name</key><string>entity.name.type.z</string></dict>
+          </dict>
+        </dict>
+        <!-- Field/param type: name: Type  (colon followed by type) -->
+        <dict>
+          <key>match</key>
+          <string>(?&lt;=:\s)(\*?[A-Z][A-Za-z0-9_]*|\*?(?:i32|i64|f32|f64|bool|str|void))</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key><dict><key>name</key><string>entity.name.type.z</string></dict>
+          </dict>
+        </dict>
+      </array>
+    </dict>
+
+    <!-- ── Built-in primitive types ───────────────────────────────── -->
+    <key>builtin-types</key>
+    <dict>
+      <key>name</key>
+      <string>storage.type.z</string>
+      <key>match</key>
+      <string>\b(i32|i64|f32|f64|bool|str|void)\b</string>
+    </dict>
+
+    <!-- ── Language constants ─────────────────────────────────────── -->
+    <key>constants</key>
+    <dict>
+      <key>name</key>
+      <string>constant.language.z</string>
+      <key>match</key>
+      <string>\b(true|false)\b</string>
+    </dict>
+
+    <!-- ── Built-in functions ─────────────────────────────────────── -->
+    <key>builtins</key>
+    <dict>
+      <key>name</key>
+      <string>support.function.builtin.z</string>
+      <key>match</key>
+      <string>\b(print|alloc|free|len|range)\b(?=\s*\()</string>
+    </dict>
+
+    <!-- ── self / mut self ────────────────────────────────────────── -->
+    <key>self-keyword</key>
+    <dict>
+      <key>name</key>
+      <string>variable.language.self.z</string>
+      <key>match</key>
+      <string>\bself\b</string>
+    </dict>
+
+    <!-- ── Numeric literals ───────────────────────────────────────── -->
+    <key>numbers</key>
+    <dict>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>name</key>
+          <string>constant.numeric.float.z</string>
+          <key>match</key>
+          <string>\b\d[\d_]*\.\d[\d_]*(?:[eE][+\-]?\d+)?\b</string>
+        </dict>
+        <dict>
+          <key>name</key>
+          <string>constant.numeric.hex.z</string>
+          <key>match</key>
+          <string>\b0x[0-9A-Fa-f_]+\b</string>
+        </dict>
+        <dict>
+          <key>name</key>
+          <string>constant.numeric.integer.z</string>
+          <key>match</key>
+          <string>\b\d[\d_]*\b</string>
+        </dict>
+      </array>
+    </dict>
+
+    <!-- ── Operators ──────────────────────────────────────────────── -->
+    <key>operators</key>
+    <dict>
+      <key>patterns</key>
+      <array>
+
+        <!-- Pointer dereference  ptr.* -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.deref.z</string>
+          <key>match</key>
+          <string>\.\*</string>
+        </dict>
+
+        <!-- Range inclusive  ..= -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.range.z</string>
+          <key>match</key>
+          <string>\.\.=</string>
+        </dict>
+
+        <!-- Range exclusive  .. -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.range.z</string>
+          <key>match</key>
+          <string>\.\.</string>
+        </dict>
+
+        <!-- Closure delimiter  |params| — single pipe, not || -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.closure.z</string>
+          <key>match</key>
+          <string>(?&lt;!\|)\|(?!\|)</string>
+        </dict>
+
+        <!-- Logical operators  &&  ||  ! -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.logical.z</string>
+          <key>match</key>
+          <string>&amp;&amp;|\|\||!</string>
+        </dict>
+
+        <!-- Comparison  ==  !=  <=  >=  <  > -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.comparison.z</string>
+          <key>match</key>
+          <string>==|!=|&lt;=|&gt;=|&lt;|&gt;</string>
+        </dict>
+
+        <!-- Compound assignment  +=  -=  *=  /=  %= -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.assignment.compound.z</string>
+          <key>match</key>
+          <string>\+=|-=|\*=|/=|%=</string>
+        </dict>
+
+        <!-- Simple assignment  = (not ==) -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.assignment.z</string>
+          <key>match</key>
+          <string>(?&lt;![=!&lt;&gt;+\-*/%])=(?!=)</string>
+        </dict>
+
+        <!-- Arithmetic  +  -  *  /  % -->
+        <dict>
+          <key>name</key>
+          <string>keyword.operator.arithmetic.z</string>
+          <key>match</key>
+          <string>[+\-*/%]</string>
+        </dict>
+
+      </array>
+    </dict>
+
+  </dict><!-- end repository -->
+
+</dict>
+</plist>

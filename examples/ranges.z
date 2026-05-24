@@ -1,0 +1,30 @@
+# ranges.z — Ranges, for loops and accumulators
+# Compile: zc ranges.z -o ranges && ./ranges
+
+def exclusive_sum(n: i32) -> i32:
+    mut total = 0
+    for i in 0..n:
+        total += i
+    return total
+
+def inclusive_sum(a: i32, b: i32) -> i32:
+    mut total = 0
+    for i in a..=b:
+        total += i
+    return total
+
+def factorial(n: i32) -> i32:
+    mut result = 1
+    for i in 1..=n:
+        result *= i
+    return result
+
+def main():
+    let s1 = exclusive_sum(10)
+    print("Sum 0..10  = {s1}")        # 45
+
+    let s2 = inclusive_sum(1, 100)
+    print("Sum 1..=100 = {s2}")       # 5050
+
+    let f10 = factorial(10)
+    print("10! = {f10}")              # 3628800

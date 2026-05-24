@@ -1,0 +1,35 @@
+# structs.z — Data structures and methods in Z
+# Compile: zc structs.z -o structs && ./structs
+
+struct Vector3:
+    x: f64
+    y: f64
+    z: f64
+
+impl Vector3:
+    def move(mut self, dx: f64, dy: f64, dz: f64):
+        self.x += dx
+        self.y += dy
+        self.z += dz
+
+    def squared_length(self) -> f64:
+        return self.x * self.x + self.y * self.y + self.z * self.z
+
+struct Particle:
+    mass: f64
+    charge: f64
+
+impl Particle:
+    def scale(mut self, factor: f64):
+        self.mass *= factor
+        self.charge *= factor
+
+def main():
+    mut pos = Vector3(x=0.0, y=0.0, z=0.0)
+    pos.move(3.0, 4.0, 0.0)
+    let l2 = pos.squared_length()
+    print("Position moved. |v|² = {l2}")
+
+    mut p = Particle(mass=9.1, charge=1.6)
+    p.scale(2.0)
+    print("Particle scaled: mass={p.mass} charge={p.charge}")

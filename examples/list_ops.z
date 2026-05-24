@@ -1,0 +1,50 @@
+# list_ops.z — List comprehensions and array operations in Z
+# Compile: zc list_ops.z -o list_ops && ./list_ops
+
+# Sum all elements of a comprehension-generated sequence
+def sum_squares(n: i32) -> i32:
+    mut total = 0
+    for x in 0..n:
+        total += x * x
+    return total
+
+# Count even numbers in range
+def count_evens(limit: i32) -> i32:
+    mut count = 0
+    for x in 0..limit:
+        if x % 2 == 0:
+            count += 1
+    return count
+
+# Dot product of [0..n] with itself
+def dot_product(n: i32) -> i32:
+    mut total = 0
+    for i in 0..n:
+        total += i * i
+    return total
+
+# Sum of cubes 1..=n
+def sum_cubes(n: i32) -> i32:
+    mut total = 0
+    for x in 1..=n:
+        total += x * x * x
+    return total
+
+def main():
+    let ss = sum_squares(10)
+    print("Sum of squares 0..9:    {ss}")    # 285
+
+    let evens = count_evens(20)
+    print("Even numbers in 0..19:  {evens}") # 10
+
+    let dp = dot_product(6)
+    print("Dot product [0..5]·[0..5]: {dp}") # 55
+
+    let sc = sum_cubes(5)
+    print("Sum of cubes 1..=5:     {sc}")    # 225
+
+    # Verify with known formulas
+    # Sum of first n squares = n(n-1)(2n-1)/6
+    # n=10: 9*10*19/6 = 285 ✓
+    # Sum of cubes 1..=n = [n(n+1)/2]^2
+    # n=5: [15]^2 = 225 ✓

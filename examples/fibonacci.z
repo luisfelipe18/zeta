@@ -1,0 +1,34 @@
+# fibonacci.z — Fibonacci sequence: recursive and iterative
+# Compile: zc fibonacci.z -o fibonacci && ./fibonacci
+
+def fib_recursive(n: i32) -> i32:
+    if n <= 1:
+        return n
+    return fib_recursive(n - 1) + fib_recursive(n - 2)
+
+def fib_iterative(n: i32) -> i32:
+    if n <= 1:
+        return n
+    mut a = 0
+    mut b = 1
+    mut i = 2
+    while i <= n:
+        mut tmp = a + b
+        a = b
+        b = tmp
+        i += 1
+    return b
+
+def main():
+    print("Fibonacci sequence (first 12 terms):")
+    mut i = 0
+    while i < 12:
+        let r = fib_iterative(i)
+        print("  fib({i}) = {r}")
+        i += 1
+
+    let r20 = fib_iterative(20)
+    print("fib(20) iterative = {r20}")
+
+    let r20r = fib_recursive(20)
+    print("fib(20) recursive = {r20r}")

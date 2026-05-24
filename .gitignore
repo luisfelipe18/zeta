@@ -1,0 +1,35 @@
+# ── Compiled objects ──────────────────────────────────────────────────
+*.o
+
+# ── Compiler binaries (built by make) ────────────────────────────────
+/zc
+/z_test
+
+# ── Benchmark temp binaries ──────────────────────────────────────────
+/bench/_prime_*
+
+# ── Temp Z/LLVM files created during compilation ─────────────────────
+/tmp/_zc_*.ll
+/tmp/_zc_*.c
+
+# ── Any compiled Z programs left in examples/ or root ────────────────
+/examples/*.out
+/examples/hello
+/examples/primes
+/examples/fibonacci
+/examples/structs
+/examples/ranges
+/examples/list_ops
+/examples/pointers
+
+# ── IDE / editor ──────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.xcodeproj/
+*.sublime-project
+*.sublime-workspace
+
+# ── macOS ─────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride

@@ -1,0 +1,6 @@
+# hello.z — First Z program
+# Compile: zc hello.z -o hello && ./hello
+
+def main():
+    let name = "world"
+    print("Hello, {name}!")
