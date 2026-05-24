@@ -22,6 +22,14 @@
 /examples/list_ops
 /examples/pointers
 
+# ── CMake build directories ───────────────────────────────────────────
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.cmake
+
 # ── IDE / editor ──────────────────────────────────────────────────────
 .idea/
 .vscode/

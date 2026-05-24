@@ -1,7 +1,7 @@
 /* zc — Z Compiler  (Phases 1-4+LLVM: Lex → Parse → Analyze → IR → clang)
    Usage:
-     zc source.z              compile via LLVM IR → clang -O3 → binary
-     zc source.z -o out       compile to ./out
+     zc source.z              compile via LLVM IR → clang -O3 → native binary
+     zc source.z -o out       compile to a specific output name
      zc source.z --emit-llvm  print LLVM IR and exit
      zc source.z --emit-c     print generated C and exit  (debug)
      zc source.z --ast        print AST and exit
@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include "platform.h"
 
 #include "parser.h"
 #include "analyzer.h"
@@ -47,8 +47,8 @@ int main(int argc, char *argv[]) {
     if (!src_path) {
         fprintf(stderr,
             "zc — Z Compiler (LLVM backend)\n"
-            "Uso: zc <archivo.z> [-o salida] [--emit-llvm] [--emit-c] [--ast]\n"
-            "     zc <archivo.z> --backend=c   usar transpilador C + gcc\n");
+            "Usage: zc <file.z> [-o output] [--emit-llvm] [--emit-c] [--ast]\n"
+            "       zc <file.z> --backend=c    use C transpiler + gcc\n");
         return 1;
     }
 
@@ -70,12 +70,21 @@ int main(int argc, char *argv[]) {
     /* ── Derive output name ───────────────────────────────────────────── */
     char default_out[512];
     if (!out_path) {
+        /* Find last path separator — handle both / and \ (Windows) */
         const char *base = strrchr(src_path, '/');
+#ifdef _WIN32
+        const char *base_w = strrchr(src_path, '\\');
+        if (!base || (base_w && base_w > base)) base = base_w;
+#endif
         base = base ? base + 1 : src_path;
-        strncpy(default_out, base, sizeof(default_out)-1);
-        default_out[sizeof(default_out)-1] = '\0';
+        strncpy(default_out, base, sizeof(default_out) - 1);
+        default_out[sizeof(default_out) - 1] = '\0';
         char *dot = strrchr(default_out, '.');
         if (dot) *dot = '\0';
+#ifdef _WIN32
+        /* On Windows, generated binaries need the .exe extension to be runnable */
+        strncat(default_out, ".exe", sizeof(default_out) - strlen(default_out) - 1);
+#endif
         out_path = default_out;
     }
 
@@ -94,7 +103,7 @@ int main(int argc, char *argv[]) {
     /* ── 5a. C backend: codegen → gcc ───────────────────────────────── */
     if (use_c_backend) {
         char c_path[512];
-        snprintf(c_path, sizeof(c_path), "/tmp/_zc_%d.c", (int)getpid());
+        snprintf(c_path, sizeof(c_path), "%s_zc_%d.c", zc_tmpdir(), ZC_GETPID());
         FILE *cf = fopen(c_path, "w");
         if (!cf) { fprintf(stderr, "zc: cannot create temp file\n"); return 1; }
         codegen(tree, global_scope, structs, cf);
@@ -115,7 +124,7 @@ int main(int argc, char *argv[]) {
 
     /* ── 5b. LLVM backend (default): llvmgen → clang -O3 ───────────── */
     char ll_path[512];
-    snprintf(ll_path, sizeof(ll_path), "/tmp/_zc_%d.ll", (int)getpid());
+    snprintf(ll_path, sizeof(ll_path), "%s_zc_%d.ll", zc_tmpdir(), ZC_GETPID());
 
     FILE *lf = fopen(ll_path, "w");
     if (!lf) { fprintf(stderr, "zc: cannot create temp file\n"); return 1; }
