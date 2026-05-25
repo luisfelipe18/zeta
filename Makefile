@@ -21,9 +21,8 @@ CC     = gcc
 CFLAGS = -Wall -Wextra -std=c99 -pedantic
 
 ifeq ($(PLATFORM),windows)
-    EXE = .exe
-    # Link against Windows sockets and process libs (needed by platform.h)
-    LDFLAGS = -lws2_32
+    EXE     = .exe
+    LDFLAGS =
 else
     EXE     =
     LDFLAGS =

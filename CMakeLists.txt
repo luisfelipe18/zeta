@@ -7,6 +7,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # ── Compiler warnings ──────────────────────────────────────────────────
 if(MSVC)
     add_compile_options(/W4)
+    # Suppress MSVC deprecation warnings for standard C functions like
+    # strncpy/strncat. These are safe in our usage (sizes are always bounded).
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
@@ -27,10 +30,7 @@ add_executable(zc
 )
 target_include_directories(zc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Windows: link against necessary system libs
-if(WIN32)
-    target_link_libraries(zc PRIVATE ws2_32)
-endif()
+# No extra Windows libs needed — we avoided windows.h in platform.h
 
 # ── z_test: AST viewer (developer tool) ──────────────────────────────
 add_executable(z_test
