@@ -17,7 +17,7 @@ static const struct { const char *word; TokenType type; } KEYWORDS[] = {
     {"false",  TOKEN_FALSE},
     {"for",    TOKEN_FOR},    {"in",     TOKEN_IN},
     {"match",  TOKEN_MATCH},  {"fn",     TOKEN_FN},
-    {"trait",  TOKEN_TRAIT},  {"type",   TOKEN_TYPE},
+    {"trait",  TOKEN_TRAIT},  {"type",   TOKEN_TYPE_KW},
     {NULL, TOKEN_ERROR},
 };
 
@@ -366,7 +366,7 @@ const char *token_type_name(TokenType t) {
         case TOKEN_MATCH:        return "MATCH";
         case TOKEN_FN:           return "FN";
         case TOKEN_TRAIT:        return "TRAIT";
-        case TOKEN_TYPE:         return "TYPE";
+        case TOKEN_TYPE_KW:      return "TYPE";
         case TOKEN_LBRACKET:     return "LBRACKET";
         case TOKEN_RBRACKET:     return "RBRACKET";
         case TOKEN_DOTDOT:       return "DOTDOT";

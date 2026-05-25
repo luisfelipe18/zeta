@@ -9,8 +9,15 @@
 
 /* ── Windows (MinGW / MSVC) ──────────────────────────────────────── */
 #ifdef _WIN32
+#  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
 #  include <process.h>   /* _getpid() */
+#  ifdef Token
+#    undef Token
+#  endif
+#  ifdef TokenType
+#    undef TokenType
+#  endif
 
    /* Temporary directory with trailing separator */
    static inline const char *zc_tmpdir(void) {
