@@ -1,0 +1,93 @@
+name: Release Zeta Binaries
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers the workflow when you push a tag like v1.0.0 or v0.1.0
+
+permissions:
+  contents: write # Required to upload releases and assets to the repository
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os-name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            os-name: Linux (x86_64)
+            asset_name: zc-linux-x86_64.tar.gz
+            binary_name: zc
+          - os: macos-latest
+            os-name: macOS (Universal - Apple Silicon & Intel)
+            asset_name: zc-macos-universal.tar.gz
+            binary_name: zc
+          - os: windows-latest
+            os-name: Windows (x86_64)
+            asset_name: zc-windows-x86_64.zip
+            binary_name: zc.exe
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure CMake (Linux & Windows)
+        if: matrix.os != 'macos-latest'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure CMake (macOS Universal Binary)
+        if: matrix.os == 'macos-latest'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+
+      - name: Build Binary
+        run: cmake --build build --config Release
+
+      - name: Run Smoke Tests (Linux & macOS)
+        if: matrix.os != 'windows-latest'
+        run: cmake --build build --config Release --target check
+
+      - name: Package Release Assets (Linux & macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd build
+          tar -czf ../${{ matrix.asset_name }} ${{ matrix.binary_name }}
+
+      - name: Package Release Assets (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd build/Release
+          7z a ../../${{ matrix.asset_name }} ${{ matrix.binary_name }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.asset_name }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/zc-linux-x86_64.tar.gz
+            release-assets/zc-macos-universal.tar.gz
+            release-assets/zc-windows-x86_64.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
