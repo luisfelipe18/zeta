@@ -3,10 +3,10 @@ name: Release Zeta Binaries
 on:
   push:
     tags:
-      - 'v*' # Triggers the workflow when you push a tag like v1.0.0 or v0.1.0
+      - 'v*'
 
 permissions:
-  contents: write # Required to upload releases and assets to the repository
+  contents: write
 
 jobs:
   build:
@@ -20,47 +20,67 @@ jobs:
             os-name: Linux (x86_64)
             asset_name: zc-linux-x86_64.tar.gz
             binary_name: zc
+
           - os: macos-latest
-            os-name: macOS (Universal - Apple Silicon & Intel)
+            os-name: macOS (Universal)
             asset_name: zc-macos-universal.tar.gz
             binary_name: zc
+
           - os: windows-latest
             os-name: Windows (x86_64)
             asset_name: zc-windows-x86_64.zip
             binary_name: zc.exe
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure CMake (Linux & Windows)
-        if: matrix.os != 'macos-latest'
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      # ── Linux: install clang (needed by zc to compile generated LLVM IR) ──
+      - name: Install clang (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y clang
 
-      - name: Configure CMake (macOS Universal Binary)
+      # ── Configure ────────────────────────────────────────────────────────
+      - name: Configure CMake (macOS universal binary)
         if: matrix.os == 'macos-latest'
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 
-      - name: Build Binary
+      - name: Configure CMake (Linux / Windows)
+        if: matrix.os != 'macos-latest'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      # ── Build ─────────────────────────────────────────────────────────────
+      - name: Build
         run: cmake --build build --config Release
 
-      - name: Run Smoke Tests (Linux & macOS)
+      # ── Smoke tests (Linux & macOS only — Windows needs clang in PATH) ────
+      - name: Smoke tests
         if: matrix.os != 'windows-latest'
         run: cmake --build build --config Release --target check
 
-      - name: Package Release Assets (Linux & macOS)
+      # ── macOS: ad-hoc code sign so the binary is runnable locally ─────────
+      #    Note: for downloaded binaries users still need to run:
+      #      xattr -dr com.apple.quarantine zc && chmod +x zc
+      - name: Ad-hoc sign (macOS)
+        if: matrix.os == 'macos-latest'
+        run: codesign --force --deep --sign - build/zc
+
+      # ── Package ───────────────────────────────────────────────────────────
+      - name: Package (Linux & macOS)
         if: matrix.os != 'windows-latest'
         run: |
-          cd build
-          tar -czf ../${{ matrix.asset_name }} ${{ matrix.binary_name }}
+          cp build/${{ matrix.binary_name }} .
+          tar -czf ${{ matrix.asset_name }} ${{ matrix.binary_name }}
 
-      - name: Package Release Assets (Windows)
+      - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          cd build/Release
-          7z a ../../${{ matrix.asset_name }} ${{ matrix.binary_name }}
+          copy build\Release\${{ matrix.binary_name }} .
+          7z a ${{ matrix.asset_name }} ${{ matrix.binary_name }}
 
-      - name: Upload Artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
@@ -71,22 +91,45 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Build Artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-assets
           merge-multiple: true
 
-      - name: Draft Release
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             release-assets/zc-linux-x86_64.tar.gz
             release-assets/zc-macos-universal.tar.gz
             release-assets/zc-windows-x86_64.zip
+          body: |
+            ## Installation
+
+            Download the binary for your platform, extract it, and place `zc` (or `zc.exe`) somewhere in your `PATH`.
+
+            ### macOS — Gatekeeper bypass
+            Apple blocks unsigned binaries downloaded from the internet. After extracting:
+            ```bash
+            xattr -dr com.apple.quarantine zc
+            chmod +x zc
+            ./zc --version
+            ```
+
+            ### Linux
+            ```bash
+            tar -xzf zc-linux-x86_64.tar.gz
+            chmod +x zc
+            ./zc --version
+            ```
+
+            ### Windows
+            Extract `zc-windows-x86_64.zip` and run `zc.exe` from a terminal.
+            `clang` must be installed and in `PATH` for the LLVM backend to work.
           draft: false
           prerelease: false
         env:

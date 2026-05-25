@@ -6,10 +6,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # ── Compiler warnings ──────────────────────────────────────────────────
 if(MSVC)
-    add_compile_options(/W4)
-    # Suppress MSVC deprecation warnings for standard C functions like
-    # strncpy/strncat. These are safe in our usage (sizes are always bounded).
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    # /W4 warnings; suppress C4996 ("strncpy unsafe") — we use bounded sizes.
+    add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
 else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
